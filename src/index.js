@@ -18,5 +18,6 @@ ReactDOM.render(
           <App />
         </SnackbarProvider>
   </React.StrictMode>,
-   document.getElementById('')
+   document.getElementById('root')
+   
 );
