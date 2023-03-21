@@ -1,4 +1,4 @@
-import { SettingsInputAntennaTwoTone } from "@mui/icons-material";
+import { SettingsInputAntennaTwoTone, TrendingUp, Troubleshoot } from "@mui/icons-material";
 import { Button, CircularProgress, Stack, TextField } from "@mui/material";
 import { Box } from "@mui/system";
 import axios from "axios";
@@ -16,9 +16,12 @@ const Register = () => {
     password: "",
     confirmpassword: "",
   });
-  let handleChange= (e) => (
-    setUser(...user,{[e.target.name]: e.target.value})
-  )
+  
+
+  let handleChange= (e) =>{
+    setUser({...user,[e.target.name]: e.target.value})
+    console.log(user);
+  }
   
   
 
@@ -47,10 +50,32 @@ const Register = () => {
    * }
    */
   const register = async (formData) => {
-    try {
-      const response = axios.get(config.endpoint + "/auth/register", formData);
-      console.log(response.data);
-    } catch (error) {}
+   console.log(formData);
+   if(validateInput(formData))
+    try{
+      
+      {
+        let res = await axios.post(config.endpoint + "/auth/register", 
+        { username: formData.username, password: formData.password } );
+        if(res.status===201){
+          enqueueSnackbar("Registered Successfully",{variant:"success"})
+        }
+      }
+
+    }
+    catch(error){
+      if(error.response&&error.response.status===400){
+        enqueueSnackbar(error.response.data.message,{variant:"error"})
+
+      }
+      else{
+        enqueueSnackbar("Something went wrong. Check that the backend is running and returns valid JSON.",{variant:"error"});
+      }
+
+    }
+  
+    
+  
   };
 
   // TODO: CRIO_TASK_MODULE_REGISTER - Implement user input validation logic
@@ -72,10 +97,33 @@ const Register = () => {
    * -    Check that confirmPassword field has the same value as password field - Passwords do not match
    */
   const validateInput = (data) => {
-    console.log("&&&",data);
-
+    //console.log(data);
+    if(data.username===""){
+      enqueueSnackbar("Username is a required field",{variant:"error"})
+      return true
+    }
+    else if(data.username.length<6){
+      enqueueSnackbar("Username must be at least 6 characters",{variant:"error"})
+      return true
+    }
+    else if(data.password===""){
+      enqueueSnackbar("Password is a required field",{variant:"error"})
+      return true
+    }
+    else if(data.password.length<6){
+      enqueueSnackbar("Password must be at least 6 characters",{variant:"error"})
+      return true
+    }
+    else if(data.password!=data.confirmPassword){
+      enqueueSnackbar("Passwords do not match",{variant:"error"})
+      
+      
+    }
+    else{
+      return true;
+    }
   };
-
+  // validateInput(user);
   const handleOnSubmit = () => {
     //take data form state
       //step1: do input validation -> const validData =  inputValidation(state data);
@@ -133,7 +181,7 @@ const Register = () => {
             onChange={handleChange}
             fullWidth
           />
-          <Button className="button" variant="contained" onClick = {()=>{register({username:user.username,password:user.password})}}>
+          <Button className="button" variant="contained" onClick = {()=>{register(user)}}>
             Register Now
           </Button>
           <p className="secondary-action">
