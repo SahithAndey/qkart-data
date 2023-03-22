@@ -4,24 +4,28 @@ import { Box } from "@mui/system";
 import axios from "axios";
 import { useSnackbar } from "notistack";
 import React, { useState } from "react";
+import { useHistory } from "react-router-dom";
 import { config } from "../App";
 import Footer from "./Footer";
 import Header from "./Header";
 import "./Register.css";
 
 const Register = () => {
+
   const { enqueueSnackbar } = useSnackbar();
   const [user, setUser] = useState({
     username: "",
     password: "",
     confirmpassword: "",
   });
+  const[fetchresponse,setFetchresponse]=useState(false)
   
 
   let handleChange= (e) =>{
     setUser({...user,[e.target.name]: e.target.value})
-    console.log(user);
+    
   }
+  const history =useHistory();
   
   
 
@@ -53,12 +57,15 @@ const Register = () => {
    console.log(formData);
    if(validateInput(formData))
     try{
-      
+      setFetchresponse(true)
       {
+        
         let res = await axios.post(config.endpoint + "/auth/register", 
         { username: formData.username, password: formData.password } );
         if(res.status===201){
           enqueueSnackbar("Registered Successfully",{variant:"success"})
+          setFetchresponse(false)
+          history.push("/login",{from:"Register"});
         }
       }
 
@@ -66,10 +73,12 @@ const Register = () => {
     catch(error){
       if(error.response&&error.response.status===400){
         enqueueSnackbar(error.response.data.message,{variant:"error"})
-
+        setFetchresponse(false)
+        
       }
       else{
         enqueueSnackbar("Something went wrong. Check that the backend is running and returns valid JSON.",{variant:"error"});
+        setFetchresponse(false)
       }
 
     }
@@ -100,15 +109,15 @@ const Register = () => {
     //console.log(data);
     if(data.username===""){
       enqueueSnackbar("Username is a required field",{variant:"error"})
-      return true
+      return false
     }
     else if(data.username.length<6){
       enqueueSnackbar("Username must be at least 6 characters",{variant:"error"})
-      return true
+      return false
     }
     else if(data.password===""){
       enqueueSnackbar("Password is a required field",{variant:"error"})
-      return true
+      return false
     }
     else if(data.password.length<6){
       enqueueSnackbar("Password must be at least 6 characters",{variant:"error"})
@@ -147,7 +156,8 @@ const Register = () => {
       justifyContent="space-between"
       minHeight="100vh"
     >
-      <Header hasHiddenAuthButtons />
+      <Header hasHiddenAuthButtons=
+      {false} />
       <Box className="content">
         <Stack spacing={2} className="form" >
           <h2 className="title">Register</h2>
@@ -180,13 +190,16 @@ const Register = () => {
             type="password"
             onChange={handleChange}
             fullWidth
-          />
+          />{(fetchresponse)?<CircularProgress/>:
+
+          
           <Button className="button" variant="contained" onClick = {()=>{register(user)}}>
             Register Now
           </Button>
+}
           <p className="secondary-action">
             Already have an account?{" "}
-            <a className="link" href="#">
+            <a className="link" href="/login">
               Login here
             </a>
           </p>
