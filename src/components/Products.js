@@ -20,6 +20,11 @@ import "./Products.css";
  * 
  * @property {string} name - The name or title of the product in cart
  * @property {string} qty - The quantity of product added to cart
+// Definition of Data Structures used
+/**
+ * @typedef {Object} Product - Data on product available to buy
+ * 
+ * @property {string} name - The name or title of the product
  * @property {string} category - The category that the product belongs to
  * @property {number} cost - The price to buy the product
  * @property {number} rating - The aggregate rating of the product (integer out of five)
@@ -69,6 +74,7 @@ const Products = () => {
   const performAPICall = async () => {
   };
 
+  // TODO: CRIO_TASK_MODULE_PRODUCTS - Implement search logic
   /**
    * Definition for search handler
    * This is the function that is called on adding new search keys
@@ -85,6 +91,7 @@ const Products = () => {
   const performSearch = async (text) => {
   };
 
+  // TODO: CRIO_TASK_MODULE_PRODUCTS - Optimise API calls with debounce search implementation
   /**
    * Definition for debounce handler
    * With debounce, this is the function to be called whenever the user types text in the searchbar field
@@ -214,11 +221,12 @@ const Products = () => {
 
   return (
     <div>
-      <Header isLogged={isLogged}
-      hasHiddenAuthButtons={true}>
-       
+      <Header>
+        {/* TODO: CRIO_TASK_MODULE_PRODUCTS - Display search bar in the header for Products page */}
+
       </Header>
 
+      {/* Search view for mobiles */}
       <TextField
         className="search-mobile"
         size="small"
@@ -233,17 +241,17 @@ const Products = () => {
         placeholder="Search for items/categories"
         name="search"
       />
-      <Grid container>
-        <Grid item className="product-grid">
-          <Box className="hero">
-            <p className="hero-heading">India's 
-            <span className="hero-highlight">FASTEST DELIVERY</span>{" "}
-            to your door step</p>
-          </Box>
-        </Grid>
-      </Grid>
-        {/* TODO: CRIO_TASK_MODULE_CART - Display the Cart component */}
-        <Footer />
+       <Grid container>
+         <Grid item className="product-grid">
+           <Box className="hero">
+             <p className="hero-heading">
+               India’s <span className="hero-highlight">FASTEST DELIVERY</span>{" "}
+               to your door step
+             </p>
+           </Box>
+         </Grid>
+       </Grid>
+      <Footer />
     </div>
   );
 };
