@@ -13,6 +13,7 @@ import { config } from "../App";
 import Footer from "./Footer";
 import Header from "./Header";
 import "./Products.css";
+import ProductCard from "./ProductCard";
 
 
 /**
@@ -20,11 +21,6 @@ import "./Products.css";
  * 
  * @property {string} name - The name or title of the product in cart
  * @property {string} qty - The quantity of product added to cart
-// Definition of Data Structures used
-/**
- * @typedef {Object} Product - Data on product available to buy
- * 
- * @property {string} name - The name or title of the product
  * @property {string} category - The category that the product belongs to
  * @property {number} cost - The price to buy the product
  * @property {number} rating - The aggregate rating of the product (integer out of five)
@@ -33,8 +29,9 @@ import "./Products.css";
  */
 
 const Products = () => {
-  const user=localStorage.getItem("username");
-  const isLogged = user?true:false;
+  const user = localStorage.getItem("username");
+  const isLogged = user ? true : false;
+
   /**
    * Make API call to get the products list and store it to display the products
    *
@@ -71,10 +68,39 @@ const Products = () => {
    *      "message": "Something went wrong. Check the backend console for more details"
    * }
    */
-  const performAPICall = async () => {
-  };
+  const [product, setProduct] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const { enqueueSnackbar } = useSnackbar();
+  const [err, setErr] = useState(false);
+  const [debounce, setDebounce] = useState(0);
 
-  // TODO: CRIO_TASK_MODULE_PRODUCTS - Implement search logic
+  const performAPICall = async () => {
+
+    try {
+      setLoading(true);
+      axios.get(config.endpoint + "/products")
+        .then((res) => {
+          setProduct(res.data);
+          setLoading(false)
+
+        });
+    }
+    catch (error) {
+      if (error.response && error.response.status === 400) {
+        enqueueSnackbar(error.response.data.message, { variant: "error" })
+        setLoading(false);
+
+
+      }
+      else {
+        enqueueSnackbar("Something went wrong. Check that the backend is running and returns valid JSON.", { variant: "error" });
+
+      }
+
+    }
+  };
+  useEffect(() => { performAPICall() }, []);
+
   /**
    * Definition for search handler
    * This is the function that is called on adding new search keys
@@ -88,10 +114,24 @@ const Products = () => {
    * API endpoint - "GET /products/search?value=<search-query>"
    *
    */
-  const performSearch = async (text) => {
-  };
 
-  // TODO: CRIO_TASK_MODULE_PRODUCTS - Optimise API calls with debounce search implementation
+  const performSearch = async (text) => {
+    try {
+      axios.get(config.endpoint + `/products/search?value=${text}`)
+        .then((res) => {
+          setErr(false)
+          setProduct(res.data)
+
+
+
+        });
+
+    }
+    catch (error) {
+      setErr(true)
+    }
+  }
+
   /**
    * Definition for debounce handler
    * With debounce, this is the function to be called whenever the user types text in the searchbar field
@@ -104,6 +144,9 @@ const Products = () => {
    *
    */
   const debounceSearch = (event, debounceTimeout) => {
+    clearTimeout(debounce);
+    const time = setTimeout(() => { performSearch(event.target.value) }, debounceTimeout);
+    setDebounce(time);
   };
 
 
@@ -221,12 +264,31 @@ const Products = () => {
 
   return (
     <div>
-      <Header>
-        {/* TODO: CRIO_TASK_MODULE_PRODUCTS - Display search bar in the header for Products page */}
+      <Header isLogged={isLogged}
+        hasHiddenAuthButtons={true}
+        children=
+        {
+          <TextField
+            className="search-desktop"
+            size="small"
+            
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <Search color="primary" />
+                </InputAdornment>
+              ),
+            }}
+            placeholder="Search for items/categories"
+            name="search"
+            onChange={(event)=>performSearch(event.target.value)}
 
-      </Header>
+          />}
 
-      {/* Search view for mobiles */}
+
+      />
+
+
       <TextField
         className="search-mobile"
         size="small"
@@ -241,19 +303,62 @@ const Products = () => {
         placeholder="Search for items/categories"
         name="search"
       />
-       <Grid container>
-         <Grid item className="product-grid">
-           <Box className="hero">
-             <p className="hero-heading">
-               India’s <span className="hero-highlight">FASTEST DELIVERY</span>{" "}
-               to your door step
-             </p>
-           </Box>
-         </Grid>
-       </Grid>
+      <Grid container>
+        <Grid item className="product-grid">
+          <Box className="hero">
+            <p className="hero-heading">India's
+              <span className="hero-highlight">FASTEST DELIVERY</span>{" "}
+              to your door step</p>
+          </Box>
+          {loading ? (
+            <Box className="loading" sx={{ display: 'flex', justifyContent: 'center' }}>
+              <CircularProgress />
+              <br />
+              <p align="center" >Loading Products</p>
+            </Box>
+
+          ) : err ? (
+            <Grid className="loading" item xs={12} md={12}>
+              <SentimentDissatisfied />
+              <br />
+              <p>No products found</p>
+            </Grid>
+
+          ) : 
+          <Grid container>
+          {product.map((product1) =>
+            <Grid item xs={6} md={3} style={{ padding: "0.5rem" }}>
+              <ProductCard
+                image={product1.image}
+
+                product={product1} />
+            </Grid>)
+}</Grid>
+
+          }
+        </Grid>
+
+      </Grid>
+
+
+
+      {/* {product.map((product1) =>{
+          return(
+            <Grid item xs={6} md={3} style={{padding:"0.5rem"}}>
+            <ProductCard 
+            image={product1.image}
+  
+            product={product1} />
+            </Grid>
+        )}
+          
+       ) };
+          */}
+      {/* TODO: CRIO_TASK_MODULE_CART - Display the Cart component */}
       <Footer />
     </div>
   );
 };
 
 export default Products;
+
