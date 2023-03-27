@@ -15,10 +15,9 @@ import Header from "./Header";
 import "./Products.css";
 import ProductCard from "./ProductCard";
 
-
 /**
  * @typedef {Object} CartItem -  - Data on product added to cart
- * 
+ *
  * @property {string} name - The name or title of the product in cart
  * @property {string} qty - The quantity of product added to cart
  * @property {string} category - The category that the product belongs to
@@ -72,34 +71,30 @@ const Products = () => {
   const [loading, setLoading] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
   const [err, setErr] = useState(false);
-  const [debounce, setDebounce] = useState(0);
+  const [debounceTimeout, setDebounceTimeout] = useState(0);
 
   const performAPICall = async () => {
-
     try {
       setLoading(true);
-      axios.get(config.endpoint + "/products")
-        .then((res) => {
-          setProduct(res.data);
-          setLoading(false)
-
-        });
-    }
-    catch (error) {
-      if (error.response && error.response.status === 400) {
-        enqueueSnackbar(error.response.data.message, { variant: "error" })
+      axios.get(config.endpoint + "/products").then((res) => {
+        setProduct(res.data);
         setLoading(false);
-
-
+      });
+    } catch (error) {
+      if (error.response && error.response.status === 400) {
+        enqueueSnackbar(error.response.data.message, { variant: "error" });
+        setLoading(false);
+      } else {
+        enqueueSnackbar(
+          "Something went wrong. Check that the backend is running and returns valid JSON.",
+          { variant: "error" }
+        );
       }
-      else {
-        enqueueSnackbar("Something went wrong. Check that the backend is running and returns valid JSON.", { variant: "error" });
-
-      }
-
     }
   };
-  useEffect(() => { performAPICall() }, []);
+  useEffect(() => {
+    performAPICall();
+  }, []);
 
   /**
    * Definition for search handler
@@ -117,20 +112,23 @@ const Products = () => {
 
   const performSearch = async (text) => {
     try {
-      axios.get(config.endpoint + `/products/search?value=${text}`)
+      await axios
+        .get(config.endpoint + `/products/search?value=${text}`)
         .then((res) => {
-          setErr(false)
-          setProduct(res.data)
-
-
-
+          setErr(false);
+          setProduct(res.data);
         });
-
+    } catch (error) {
+      if (error.response !== undefined && error.response.status === 404) {
+        enqueueSnackbar("No products found", { variant: "error" });
+      } else {
+        
+        enqueueSnackbar(error.response.data.message, { variant: "error" });
+      }
+      
+      setErr(true);
     }
-    catch (error) {
-      setErr(true)
-    }
-  }
+  };
 
   /**
    * Definition for debounce handler
@@ -144,11 +142,13 @@ const Products = () => {
    *
    */
   const debounceSearch = (event, debounceTimeout) => {
-    clearTimeout(debounce);
-    const time = setTimeout(() => { performSearch(event.target.value) }, debounceTimeout);
-    setDebounce(time);
+    const searchKey = event.target.value;
+    clearTimeout(debounceTimeout);
+    const time = setTimeout(() => {
+      performSearch(searchKey);
+    }, 500);
+    setDebounceTimeout(time);
   };
-
 
   /**
    * Perform the API call to fetch the user's cart and return the response
@@ -180,7 +180,6 @@ const Products = () => {
    */
   const fetchCart = async (token) => {
     // if (!token) return;
-
     // try {
     //   // TODO: CRIO_TASK_MODULE_CART - Pass Bearer token inside "Authorization" header to get data from "GET /cart" API and return the response data
     // } catch (e) {
@@ -198,7 +197,6 @@ const Products = () => {
     // }
   };
 
-
   // TODO: CRIO_TASK_MODULE_CART - Return if a product already exists in the cart
   /**
    * Return if a product already is present in the cart
@@ -212,8 +210,7 @@ const Products = () => {
    *    Whether a product of given "productId" exists in the "items" array
    *
    */
-  const isItemInCart = (items, productId) => {
-  };
+  const isItemInCart = (items, productId) => {};
 
   /**
    * Perform the API call to add or update items in the user's cart and update local cart data to display the latest cart
@@ -258,20 +255,18 @@ const Products = () => {
     productId,
     qty,
     options = { preventDuplicate: false }
-  ) => {
-  };
-
+  ) => {};
 
   return (
     <div>
-      <Header isLogged={isLogged}
+      <Header
+        isLogged={isLogged}
         hasHiddenAuthButtons={true}
-        children=
-        {
+        children={
           <TextField
             className="search-desktop"
             size="small"
-            
+            variant="outlined"
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
@@ -281,13 +276,10 @@ const Products = () => {
             }}
             placeholder="Search for items/categories"
             name="search"
-            onChange={(event)=>performSearch(event.target.value)}
-
-          />}
-
-
+            onChange={(event) => debounceSearch(event, 500)}
+          />
+        }
       />
-
 
       <TextField
         className="search-mobile"
@@ -302,45 +294,43 @@ const Products = () => {
         }}
         placeholder="Search for items/categories"
         name="search"
+        onChange={(event) => debounceSearch(event.target.value)}
       />
       <Grid container>
         <Grid item className="product-grid">
           <Box className="hero">
-            <p className="hero-heading">India's
-              <span className="hero-highlight">FASTEST DELIVERY</span>{" "}
-              to your door step</p>
+            <p className="hero-heading">
+              India's
+              <span className="hero-highlight">FASTEST DELIVERY</span> to your
+              door step
+            </p>
           </Box>
           {loading ? (
-            <Box className="loading" sx={{ display: 'flex', justifyContent: 'center' }}>
+            <Box
+              className="loading"
+              sx={{ display: "flex", justifyContent: "center" }}
+            >
               <CircularProgress />
               <br />
-              <p align="center" >Loading Products</p>
+              <p align="center">Loading Products</p>
             </Box>
-
-          ) : err ? (
+          ):err ? (
             <Grid className="loading" item xs={12} md={12}>
               <SentimentDissatisfied />
               <br />
               <p>No products found</p>
             </Grid>
-
-          ) : 
-          <Grid container>
-          {product.map((product1) =>
-            <Grid item xs={6} md={3} style={{ padding: "0.5rem" }}>
-              <ProductCard
-                image={product1.image}
-
-                product={product1} />
-            </Grid>)
-}</Grid>
-
-          }
+          ) : (
+            <Grid container >
+              {product.map((product1) => (
+                <Grid item xs={6} md={3} style={{ padding: "0.5rem" }} key={product._id}>
+                  <ProductCard image={product1.image} product={product1} />
+                </Grid>
+              ))}
+            </Grid>
+          )}
         </Grid>
-
       </Grid>
-
-
 
       {/* {product.map((product1) =>{
           return(
@@ -361,4 +351,3 @@ const Products = () => {
 };
 
 export default Products;
-

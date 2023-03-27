@@ -17,7 +17,7 @@ const Login = () => {
   });
   let handleChange= (e) =>{
     setUser({...user,[e.target.name]: e.target.value})
-    console.log(user);
+    
   }
   const history=useHistory();
 
@@ -54,7 +54,7 @@ const Login = () => {
           if(res.status===201){
             enqueueSnackbar("Logged In successfully",{variant:"success"})
           }
-          console.log(res);
+          // console.log(res);
           const{token,username,balance}=res.data
             persistLogin(token, username,balance)
             history.push("/",{from:"Login"});
