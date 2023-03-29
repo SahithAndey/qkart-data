@@ -14,6 +14,7 @@ import Footer from "./Footer";
 import Header from "./Header";
 import "./Products.css";
 import ProductCard from "./ProductCard";
+import {styled} from "@mui/material/styles"
 
 /**
  * @typedef {Object} CartItem -  - Data on product added to cart
@@ -76,9 +77,11 @@ const Products = () => {
   const performAPICall = async () => {
     try {
       setLoading(true);
-      axios.get(config.endpoint + "/products").then((res) => {
-        setProduct(res.data);
+      await axios.get(config.endpoint + "/products").then((res) => {
         setLoading(false);
+        if(res.status==200){
+        setProduct(res.data);
+        }
       });
     } catch (error) {
       if (error.response && error.response.status === 400) {
@@ -89,6 +92,7 @@ const Products = () => {
           "Something went wrong. Check that the backend is running and returns valid JSON.",
           { variant: "error" }
         );
+        setLoading(false);
       }
     }
   };
@@ -140,33 +144,25 @@ const Products = () => {
    *    Timer id set for the previous debounce call
    *
    */
-  const debounceSearch = (event, debounceTimeout) => {
-    //const searchKey = event.target.value;
-    //clearTimeout(debounceTimeout);
-    //const time = setTimeout(() => {
-     // performSearch(searchKey);
-    //}, 500);
-    //setDebounceTimeout(time);
+  const debounceSearch = (event, debounceTimeout) =>{
+    // // const searchKey = event.target.value;
+    // let timer;
+    // // clearTimeout(timer);
+    // // timer = setTimeout(() => {
+    // //   performSearch(searchKey);
+    // // }, 500);
+    // // setDebounceTimeout(time);
+
     debounce(()=>performSearch(event.target.value), debounceTimeout)
-
   };
-
- function debounce(func, timeout){
-
- let timer;
-
- const args = arguments;
-
- clearTimeout(timer);
-
- timer=setTimeout(()=>{
-
- func.apply(this, args);
-
- }, timeout);
-
- }
-  
+  function debounce(func, timeout){
+    let timer;
+    const args = arguments;
+    clearTimeout(timer);
+    timer=setTimeout(()=>{
+      func.apply(this, args);
+    }, timeout);
+  }
 
   /**
    * Perform the API call to fetch the user's cart and return the response
@@ -313,7 +309,6 @@ const Products = () => {
         placeholder="Search for items/categories"
         name="search"
         onChange={(event) => debounceSearch(event.target.value)}
-        
       />
       <Grid container>
         <Grid item className="product-grid">
@@ -324,6 +319,7 @@ const Products = () => {
               door step
             </p>
           </Box>
+          {/* when the page loades */}
           {loading ? (
             <Box
               className="loading"
@@ -336,42 +332,30 @@ const Products = () => {
           ) : err ? (
             <Grid className="loading" item xs={12} md={12}>
               <SentimentDissatisfied />
-              <br />
+              
               <p>No products found</p>
             </Grid>
           ) : (
-            <Grid container>
-              {product.map((product1) => (
+            <Grid item container>
+              {product.map((prod) =>{ return (
+               
                 <Grid
                   item
                   className="product-grid"
                   xs={6}
                   md={3}
                   style={{ padding: "0.5rem" }}
-                  key={product1._id}
+                  id={prod._id}
                 >
-                  
-                    <ProductCard product={product1} />
-                  
+                   
+                <ProductCard product={prod} />
+                
                 </Grid>
-              ))}
+              );})}
             </Grid>
           )}
         </Grid>
       </Grid>
-
-      {/* {product.map((product1) =>{
-          return(
-            <Grid item xs={6} md={3} style={{padding:"0.5rem"}}>
-            <ProductCard 
-            image={product1.image}
-  
-            product={product1} />
-            </Grid>
-        )}
-          
-       ) };
-          */}
       {/* TODO: CRIO_TASK_MODULE_CART - Display the Cart component */}
       <Footer />
     </div>
