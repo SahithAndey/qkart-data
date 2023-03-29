@@ -122,10 +122,9 @@ const Products = () => {
       if (error.response !== undefined && error.response.status === 404) {
         enqueueSnackbar("No products found", { variant: "error" });
       } else {
-        
         enqueueSnackbar(error.response.data.message, { variant: "error" });
       }
-      
+
       setErr(true);
     }
   };
@@ -142,12 +141,31 @@ const Products = () => {
    *
    */
   const debounceSearch = (event, debounceTimeout) => {
-    const searchKey = event.target.value;
-    clearTimeout(debounceTimeout);
-    const time = setTimeout(() => {
-      performSearch(searchKey);
-    }, 500);
-    setDebounceTimeout(time);
+    //const searchKey = event.target.value;
+    //clearTimeout(debounceTimeout);
+    //const time = setTimeout(() => {
+     // performSearch(searchKey);
+    //}, 500);
+    //setDebounceTimeout(time);
+    debounce(()=>performSearch(event.target.value), debounceTimeout)
+
+ 
+
+ function debounce(func, timeout){
+
+ let timer;
+
+ const args = arguments;
+
+ clearTimeout(timer);
+
+ timer=setTimeout(()=>{
+
+ func.apply(this, args);
+
+ }, timeout);
+
+ }
   };
 
   /**
@@ -314,17 +332,26 @@ const Products = () => {
               <br />
               <p align="center">Loading Products</p>
             </Box>
-          ):err ? (
+          ) : err ? (
             <Grid className="loading" item xs={12} md={12}>
               <SentimentDissatisfied />
               <br />
               <p>No products found</p>
             </Grid>
           ) : (
-            <Grid container >
+            <Grid container>
               {product.map((product1) => (
-                <Grid item xs={6} md={3} style={{ padding: "0.5rem" }} key={product._id}>
-                  <ProductCard image={product1.image} product={product1} />
+                <Grid
+                  item
+                  className="product-grid"
+                  xs={6}
+                  md={3}
+                  style={{ padding: "0.5rem" }}
+                  key={product1._id}
+                >
+                  
+                    <ProductCard product={product1} />
+                  
                 </Grid>
               ))}
             </Grid>
