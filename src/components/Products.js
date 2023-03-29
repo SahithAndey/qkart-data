@@ -71,7 +71,7 @@ const Products = () => {
   const [loading, setLoading] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
   const [err, setErr] = useState(false);
-  const [debounceTimeout, setDebounceTimeout] = useState(0);
+  const [debounceTimeout, setDebounceTimeout] = useState(500);
 
   const performAPICall = async () => {
     try {
@@ -149,7 +149,7 @@ const Products = () => {
     //setDebounceTimeout(time);
     debounce(()=>performSearch(event.target.value), debounceTimeout)
 
- 
+  };
 
  function debounce(func, timeout){
 
@@ -166,7 +166,7 @@ const Products = () => {
  }, timeout);
 
  }
-  };
+  
 
   /**
    * Perform the API call to fetch the user's cart and return the response
@@ -313,6 +313,7 @@ const Products = () => {
         placeholder="Search for items/categories"
         name="search"
         onChange={(event) => debounceSearch(event.target.value)}
+        
       />
       <Grid container>
         <Grid item className="product-grid">
