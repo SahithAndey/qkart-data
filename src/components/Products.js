@@ -73,6 +73,7 @@ const Products = () => {
   const { enqueueSnackbar } = useSnackbar();
   const [err, setErr] = useState(false);
   const [debounceTimeout, setDebounceTimeout] = useState(500);
+  
 
   const performAPICall = async () => {
     try {
@@ -132,7 +133,7 @@ const Products = () => {
       setErr(true);
     }
   };
-
+  
   /**
    * Definition for debounce handler
    * With debounce, this is the function to be called whenever the user types text in the searchbar field
@@ -144,7 +145,8 @@ const Products = () => {
    *    Timer id set for the previous debounce call
    *
    */
-  const debounceSearch = (event, debounceTimeout) =>{
+  
+  const debounceSearch = (event,debounceTimeout) =>{
     // // const searchKey = event.target.value;
     // let timer;
     // // clearTimeout(timer);
