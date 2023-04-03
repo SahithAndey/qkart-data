@@ -10,7 +10,7 @@ p {
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
-    padding: 1rem;
+    padding: 1rem; 
     background-color: #DCFFE4;
 }
 
